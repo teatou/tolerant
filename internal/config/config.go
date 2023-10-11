@@ -11,6 +11,7 @@ type Config struct {
 	Database DatabaseConfig `yaml:"database"`
 	Redis    RedisConfig    `yaml:"redis"`
 	Logger   LoggerConfig   `yaml:"logger"`
+	Server   ServerConfig   `yaml:"server"`
 }
 
 type DatabaseConfig struct {
@@ -29,6 +30,10 @@ type RedisConfig struct {
 
 type LoggerConfig struct {
 	Level string `yaml:"level"`
+}
+
+type ServerConfig struct {
+	Port int `yaml:"port"`
 }
 
 func LoadConfig(filename string) (*Config, error) {

@@ -47,3 +47,6 @@ func WithTransaction(db *sql.DB, fn TxFn) (err error) {
 	err = fn(tx)
 	return err
 }
+
+
+ЗАКЕШИТЬ - КЛАСТЬ В БД - ЕСЛИ УПАДЕТ ОСТАВИТЬ КЕШ - ЕСЛИ ПРОЙДЕТ - УДАЛИТЬ КЕШ

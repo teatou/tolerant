@@ -3,6 +3,8 @@ package add
 import (
 	"net/http"
 
+	"github.com/gin-gonic/gin"
+	"github.com/teatou/tolerant/internal/storage"
 	"github.com/teatou/tolerant/pkg/mylogger"
 )
 
@@ -10,8 +12,44 @@ type Adder interface {
 	Add(to, sum int) error
 }
 
-func New(adder Adder, logger mylogger.Logger) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+type Cacher interface {
+	Cache(t storage.Transaction) (int, error)
+	Delete(uid int) error
+}
 
+func New(adder Adder, cacher Cacher, logger mylogger.Logger) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		var t storage.Transaction
+		c.Bind(&t)
+
+		uid, err := cacher.Cache(t)
+		cached := true
+		if err != nil {
+			cached = false
+		}
+
+		err = adder.Add(t.To, t.Sum)
+		if err != nil {
+			if cached {
+				c.JSON(http.StatusInsufficientStorage, gin.H{
+					"status": "cached, not stored",
+				})
+			}
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status": "not cached, not stored",
+			})
+		}
+
+		// удалить кеш
+		err = cacher.Delete(uid)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": "unable to delete cache",
+			})
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"status": "stored, cache deleted",
+		})
 	}
 }
