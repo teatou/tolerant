@@ -54,6 +54,31 @@ func (s *Storage) Retrieve(from, sum int) error {
 	return nil
 }
 
+func (s *Storage) Transfer(from, to, sum int) error {
+	// !имплементировать откаты!
+
+	sumFrom, err := s.CheckBalance(from)
+	if err != nil {
+		return err
+	}
+
+	if sumFrom < sum {
+		return fmt.Errorf("not enough money")
+	}
+
+	err = s.Add(to, sum)
+	if err != nil {
+		return err
+	}
+
+	err = s.Retrieve(from, sum)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *Storage) CheckBalance(id int) (int, error) {
 	q := `SELECT sum FROM users
 		WHERE id = $1`

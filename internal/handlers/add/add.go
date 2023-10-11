@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/teatou/tolerant/internal/storage"
+	"github.com/teatou/tolerant/internal/storage/cache"
 	"github.com/teatou/tolerant/pkg/mylogger"
 )
 
@@ -12,12 +13,7 @@ type Adder interface {
 	Add(to, sum int) error
 }
 
-type Cacher interface {
-	Cache(t storage.Transaction) (int, error)
-	Delete(uid int) error
-}
-
-func New(adder Adder, cacher Cacher, logger mylogger.Logger) func(c *gin.Context) {
+func New(adder Adder, cacher *cache.Cacher, logger mylogger.Logger) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		var t storage.Transaction
 		c.Bind(&t)

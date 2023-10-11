@@ -8,11 +8,16 @@ import (
 	"github.com/teatou/tolerant/internal/storage"
 )
 
-type Cache struct {
+type CacheStorage struct {
 	client *redis.Client
 }
 
-func New(addr, password string, db int) (*Cache, error) {
+type Cacher interface {
+	Cache(t storage.Transaction) (int, error)
+	Delete(uid int) error
+}
+
+func New(addr, password string, db int) (*CacheStorage, error) {
 	client := redis.NewClient(&redis.Options{
 		Addr:     addr,
 		Password: password,
@@ -23,12 +28,12 @@ func New(addr, password string, db int) (*Cache, error) {
 		return nil, fmt.Errorf("cache client connection error: %w", err)
 	}
 
-	return &Cache{
+	return &CacheStorage{
 		client: client,
 	}, nil
 }
 
-func (c *Cache) Cache(t storage.Transaction) (int, error) {
+func (c *CacheStorage) Cache(t storage.Transaction) (int, error) {
 	// создать uid
 
 	// создать json
