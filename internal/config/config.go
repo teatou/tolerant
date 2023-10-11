@@ -1,0 +1,45 @@
+package config
+
+import (
+	"fmt"
+	"os"
+
+	"gopkg.in/yaml.v3"
+)
+
+type Config struct {
+	Database DatabaseConfig `yaml:"database"`
+	Redis    RedisConfig    `yaml:"redis"`
+	Logger   LoggerConfig   `yaml:"logger"`
+}
+
+type DatabaseConfig struct {
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	DbName   string `yaml:"dbname"`
+}
+
+type RedisConfig struct {
+	Addr     string `yaml:"address"`
+	Password string `yaml:"password"`
+	DB       int    `yaml:"db"`
+}
+
+type LoggerConfig struct {
+	Level string `yaml:"level"`
+}
+
+func LoadConfig(filename string) (*Config, error) {
+	file, err := os.ReadFile(filename)
+	if err != nil {
+		return nil, fmt.Errorf("read config file: %w", err)
+	}
+	cfg := Config{}
+	err = yaml.Unmarshal(file, &cfg)
+	if err != nil {
+		return nil, fmt.Errorf("unmarshal config file: %w", err)
+	}
+	return &cfg, nil
+}
